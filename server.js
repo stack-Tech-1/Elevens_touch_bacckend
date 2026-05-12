@@ -7,30 +7,29 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+    .then(function() { console.log('MongoDB connected'); })
+    .catch(function(err) { console.error('MongoDB connection error:', err.message); });
 
-// Routes
-app.use(‘/api/products’, require(‘./routes/productRoutes’));
-app.use(‘/api/users’, require(‘./routes/userRoutes’));
-app.use(‘/api/orders’, require(‘./routes/orderRoutes’));
+app.use('/api/products', require('./routes/productRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/orders', require('./routes/orderRoutes'));
 
-// Global error handler
-app.use((err, req, res, next) => {
+app.use(function(err, req, res, next) {
     console.error(err.stack);
-    res.status(500).json({ message: ‘Internal server error’ });
+    res.status(500).json({ message: 'Internal server error' });
 });
 
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => console.log('Server running on port ' + PORT));
+var PORT = process.env.PORT || 5000;
+var server = app.listen(PORT, function() {
+    console.log('Server running on port ' + PORT);
+});
 
-const shutdown = () => {
-    server.close(() => {
+function shutdown() {
+    server.close(function() {
         mongoose.connection.close();
         process.exit(0);
     });
-};
-process.on(‘SIGTERM’, shutdown);
-process.on(‘SIGINT’, shutdown);
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
